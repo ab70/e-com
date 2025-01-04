@@ -5,6 +5,8 @@ import { handleError } from "../../../utils/types/errorHandle";
 
 export const createProduct_func = async (userInfo: IUser, data: any, images?: any) => {
     try {
+        console.log("data", data)
+        
         // Handle file uploads
         let uploadedImages: string[] = [];
         if (images) {
