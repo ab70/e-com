@@ -1,4 +1,8 @@
 import { createRoute } from "@hono/zod-openapi";
+export const contentType = {
+    applicationJson: "application/json",
+    multipartFormData: "multipart/form-data",
+}
 
 // Utility function to generate GET routes
 const commonResponses = {
@@ -21,7 +25,7 @@ export const Get = (data: { path: string, query?: any, tags: string[], middlewar
     });
 };
 
-export const Post = (data: { path: string, tags: string[], middleware?: any[], schema: any, summary?: string }) => {
+export const Post = (data: { path: string, tags: string[], middleware?: any[], schema: any, summary?: string, type?: string }) => {
     return createRoute({
         tags: data.tags,
         method: "post",
@@ -30,7 +34,7 @@ export const Post = (data: { path: string, tags: string[], middleware?: any[], s
         request: {
             body: {
                 content: {
-                    "application/json": {
+                    [data.type || contentType.applicationJson]: {
                         schema: data.schema
                     }
                 }
@@ -41,7 +45,8 @@ export const Post = (data: { path: string, tags: string[], middleware?: any[], s
     });
 };
 
-export const Patch = (data: { path: string, query?: any, tags: string[], middleware?: any[], schema: any }) => {
+
+export const Patch = (data: { path: string, query?: any, tags: string[], middleware?: any[], schema: any, type?: string }) => {
     return createRoute({
         tags: data.tags,
         method: "patch",
@@ -51,7 +56,7 @@ export const Patch = (data: { path: string, query?: any, tags: string[], middlew
             query: data.query,
             body: {
                 content: {
-                    "application/json": {
+                    [data.type || contentType.applicationJson]: {
                         schema: data.schema
                     }
                 }
@@ -66,7 +71,7 @@ export const Delete = (data: { path: string, params?: any, query?: any, tags: st
         tags: data.tags,
         method: "delete",
         path: data.path,
-        request:{
+        request: {
             query: data.query
         },
         middleware: data.middleware,

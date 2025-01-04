@@ -1,11 +1,11 @@
 import mongoose, { Document, Schema } from "mongoose";
-// import bcrypt from "bcrypt";
 import { z } from "@hono/zod-openapi";
 
 export enum UserRole {
     SUPER_ADMIN = "SUPER_ADMIN",
     ADMIN = "ADMIN",
     MANAGER = "MANAGER",
+    EMPLOYEE = "EMPLOYEE",
     USER = "USER"
 }
 
@@ -43,8 +43,6 @@ const userSchema: Schema<IUser> = new Schema(
 // Hash the password before saving
 userSchema.pre<IUser>("save", async function (next) {
     if (this.isModified("password")) {
-        // const salt = await bcrypt.genSalt(10);
-        // this.password = await bcrypt.hash(this.password, salt);
         this.password = await Bun.password.hash(this.password, {
             algorithm: "bcrypt",
             cost: 4,
