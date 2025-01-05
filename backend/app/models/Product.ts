@@ -70,20 +70,32 @@ export const Product = mongoose.model<IProduct>("Product", productSchema);
 export const ProductPostSchema = z.object({
     name: z.string().min(1, { message: "Product name is required" }),
     description: z.string().optional(),
-    price: z.number().min(0, { message: "Price must be non-negative" }),
-    stock: z.number().min(0, { message: "Stock must be non-negative" }),
+    price:  z.preprocess((val) => parseFloat(val as string), z.number().min(0)),
+    stock:z.preprocess((val) => parseInt(val as string, 10), z.number().min(0)),
     category: z.string().min(1, { message: "Category ID is required" }),
     images: z.array(z.any().openapi({type: "string", format: "binary"})),
-    varient: z.object({
-        label: z.string(),
+    varient: z
+    .preprocess((val) => {
+        // Parse the string if it's a stringified JSON
+        if (typeof val === "string") {
+            try {
+                return JSON.parse(val);
+            } catch (error) {
+                return {}; // Default to an empty object if parsing fails
+            }
+        }
+        return val; // If already an object, return as-is
+    }, 
+    z.object({
+        label: z.string().optional(),
         varients: z.array(
             z.object({
                 name: z.string(),
-                price: z.number(),
-                stock: z.number(),
+                price: z.number(), // Ensure price is number
+                stock: z.number(), // Ensure stock is number
                 description: z.string(),
-                images: z.array(z.any().openapi({type: "string", format: "binary"})).optional().default([]),
+                images: z.array(z.string()).optional(),
             })
-        ),
-    }),
+        ).optional().default([]),
+    }).optional()),
 });

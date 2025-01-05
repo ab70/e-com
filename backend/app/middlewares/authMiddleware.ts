@@ -9,7 +9,8 @@ import type { TokenType } from "../utils/types/types";
 export const checkUser = async (c: Context, next: any) => {
     try {
         const token = await getSignedCookie(c, process.env.JWT_SECRET || '', 'ecom_token');
-
+        console.log("c", await c.req.parseBody({all: true}));
+        
         if (token) {
             const decodedToken: TokenType = await verify(token, process.env.JWT_SECRET || '') as TokenType;
             let userInfo: any = null;
