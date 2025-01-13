@@ -9,7 +9,8 @@ function orderControllers() {
         async createOrder(c: Context) {
             try {
                 const data = await c.req.json();
-                const result = await createOrder_func(data);
+                const userInfo = await c.get("user");
+                const result = await createOrder_func(userInfo, data);
 
                 if (!result.success) {
                     return c.json({ success: false, message: result.message }, 400);

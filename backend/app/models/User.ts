@@ -16,6 +16,7 @@ export interface IUser extends Document {
     phoneNo?: string;
     password: string;
     mfaEnabled: boolean;
+    vendor: mongoose.Types.ObjectId; // Reference to Vendor schema
     mfaSecret?: string;
     role: string;
 }
@@ -28,6 +29,7 @@ const userSchema: Schema<IUser> = new Schema(
         phoneNo: { type: String, trim: true, default: "" },
         password: { type: String, required: true, trim: true, select: false },
         mfaEnabled: { type: Boolean, default: false },
+        vendor: { type: Schema.Types.ObjectId, ref: "Vendor", required: true, default: null },
         mfaSecret: { type: String, select: false },
         role: {
             type: String,

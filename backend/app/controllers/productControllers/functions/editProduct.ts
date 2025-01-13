@@ -10,6 +10,9 @@ export const updateProduct_func = async (userInfo: IUser, id: string, data: any)
         if (!product) {
             return { success: false, message: "Product not found" };
         }
+        if(data?.vendor){
+            delete data.vendor;
+        }
 
         // Ensure the updater has permission
         if (product.createdBy.toString() !== userInfo._id) {
