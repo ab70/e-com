@@ -1,6 +1,14 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { z } from "@hono/zod-openapi";
 
+export enum VendorTypeEnum {
+    Manufacturer = "Manufacturer",
+    Distributor = "Distributor",
+    Retailer = "Retailer",
+    Wholesaler = "Wholesaler",
+    ServiceProvider = "ServiceProvider",
+}
+
 export interface IVendor extends Document {
     vendorName: string;
     vendorDetails?: string;
@@ -12,7 +20,7 @@ export interface IVendor extends Document {
         country: string;
         postalCode?: string;
     }[];
-    vendorType: "Manufacturer" | "Distributor" | "Retailer" | "Wholesaler" | "ServiceProvider";
+    vendorType: VendorTypeEnum;
     createdBy: mongoose.Types.ObjectId; // Reference to User schema
     updatedBy: mongoose.Types.ObjectId; // Reference to User schema
 }
@@ -33,7 +41,8 @@ const vendorSchema = new Schema<IVendor>(
         ],
         vendorType: {
             type: String,
-            enum: ["Manufacturer", "Distributor", "Retailer", "Wholesaler", "ServiceProvider"],
+            enum: Object.values(VendorTypeEnum),
+            default: VendorTypeEnum.Manufacturer,
             required: true,
         },
         createdBy: { type: Schema.Types.ObjectId, ref: "User" },
@@ -49,7 +58,7 @@ export const Vendor = mongoose.model<IVendor>("Vendor", vendorSchema);
 export const VendorPostSchema = z.object({
     vendorName: z.string().min(1, { message: "Vendor name is required" }),
     vendorDetails: z.string().optional(),
-    logo: z.string().url({ message: "Logo must be a valid URL" }).optional(),
+    logo: z.any().openapi({ type: "string", format: "binary" }).optional(),
     vendorAddress: z
         .array(
             z.object({
@@ -61,12 +70,6 @@ export const VendorPostSchema = z.object({
             })
         )
         .min(1, { message: "At least one address is required" }),
-    vendorType: z.enum([
-        "Manufacturer",
-        "Distributor",
-        "Retailer",
-        "Wholesaler",
-        "ServiceProvider",
-    ]),
+    vendorType: z.nativeEnum(VendorTypeEnum).optional(),
     createdBy: z.string().min(1, { message: "CreatedBy (user ID) is required" }),
 });
