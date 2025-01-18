@@ -14,7 +14,7 @@ export const createVendor_func = async (userInfo: IUser, data: any, logo?: any) 
                 data.logo = null;
             }
         }
-
+        
         // Populate createdBy and updatedBy
         data.createdBy = userInfo._id;
         data.updatedBy = userInfo._id;

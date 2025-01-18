@@ -4,6 +4,7 @@ import { signupUser_func } from "./functions/signUp";
 import { signinUser_func } from "./functions/signin";
 import { createSession } from "../../middlewares/sessionStore";
 import type { Context } from "hono";
+import { adminSignupUser_func } from "./functions/adminSignUp";
 
 function authControllers() {
     return {
@@ -52,17 +53,30 @@ function authControllers() {
                     accessToken,
                     process.env.JWT_SECRET as string,
                     {
-                        httpOnly: true,
-                        secure: true,
+                        httpOnly: process.env.production === "true" ? true : false,
+                        secure: process.env.production === "true" ? true : false,
                         sameSite: "lax",
                         path: "/",
-                        maxAge: 60 * 60 * 24, // 24 hours
+                        maxAge: 60 * 60 * 24,
                     }
                 );
 
                 return c.json({ success: true, message: "Signin successful", user: result.data });
             } catch (err: any) {
                 console.log("err", err);
+                return c.json({ success: false, message: err.message }, 500);
+            }
+        },
+        // Admin sign up
+        async adminSignup(c: Context) {
+            try {
+                const data = await c.req.json();
+                const result = await adminSignupUser_func(data);
+                if (!result.success) {
+                    return c.json({ success: false, message: result.message }, 400);
+                }
+                return c.json({ success: true, message: "Admin Signup successful", user: result.data });
+            } catch (err: any) {
                 return c.json({ success: false, message: err.message }, 500);
             }
         },

@@ -60,16 +60,26 @@ export const VendorPostSchema = z.object({
     vendorDetails: z.string().optional(),
     logo: z.any().openapi({ type: "string", format: "binary" }).optional(),
     vendorAddress: z
-        .array(
-            z.object({
-                street: z.string().min(1, { message: "Street is required" }),
-                city: z.string().min(1, { message: "City is required" }),
-                state: z.string().optional(),
-                country: z.string().min(1, { message: "Country is required" }),
-                postalCode: z.string().optional(),
-            })
-        )
-        .min(1, { message: "At least one address is required" }),
+        .preprocess((value) => {
+            if (typeof value === "string") {
+                try {
+                    return JSON.parse(value);
+                } catch {
+                    throw new Error("Invalid JSON format for vendorAddress.");
+                }
+            }
+            return value;
+        },
+            z.array(
+                z.object({
+                    street: z.string().min(1, { message: "Street is required" }),
+                    city: z.string().min(1, { message: "City is required" }),
+                    state: z.string().optional(),
+                    country: z.string().min(1, { message: "Country is required" }),
+                    postalCode: z.string().optional(),
+                })
+            ).min(1, { message: "At least one address is required" })
+        ),
     vendorType: z.nativeEnum(VendorTypeEnum).optional(),
-    createdBy: z.string().min(1, { message: "CreatedBy (user ID) is required" }),
+    // createdBy: z.string().min(1, { message: "CreatedBy (user ID) is required" }),
 });

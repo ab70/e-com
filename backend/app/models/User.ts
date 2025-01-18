@@ -16,9 +16,9 @@ export interface IUser extends Document {
     phoneNo?: string;
     password: string;
     mfaEnabled: boolean;
-    vendor: mongoose.Types.ObjectId; // Reference to Vendor schema
+    vendor?: mongoose.Types.ObjectId; // Reference to Vendor schema
     mfaSecret?: string;
-    role: string;
+    role?: string;
 }
 
 const userSchema: Schema<IUser> = new Schema(
@@ -29,7 +29,7 @@ const userSchema: Schema<IUser> = new Schema(
         phoneNo: { type: String, trim: true, default: "" },
         password: { type: String, required: true, trim: true, select: false },
         mfaEnabled: { type: Boolean, default: false },
-        vendor: { type: Schema.Types.ObjectId, ref: "Vendor", required: true, default: null },
+        vendor: { type: Schema.Types.ObjectId, ref: "Vendor", required: false, default: null },
         mfaSecret: { type: String, select: false },
         role: {
             type: String,
@@ -56,8 +56,8 @@ userSchema.pre<IUser>("save", async function (next) {
 export const User = mongoose.model<IUser>("User", userSchema);
 
 export const loginPostSchema = z.object({
-    email: z.string().email().default("user@example.com"),
-    password: z.string().default("stringst"),
+    email: z.string().email().default("admin@ecom.com"),
+    password: z.string().default("12345678"),
 })
 export const UserPostSchema = z.object({
     firstName: z.string(), // Optional for modification
@@ -65,8 +65,8 @@ export const UserPostSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }),
     password: z.string().min(8, { message: "Password must be at least 8 characters long" }),
     phoneNo: z.string().optional(),
-    mfaEnabled: z.boolean().optional().default(false),
-    mfaSecret: z.string().optional(),
+    // mfaEnabled: z.boolean().optional().default(false),
+    // mfaSecret: z.string().optional(),
     // role: z.nativeEnum(UserRole).optional().default(UserRole.USER), // Optional role modification
 });
 
@@ -76,6 +76,6 @@ export const modifyUserSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }).optional(),
     phoneNo: z.string().optional(),
     mfaEnabled: z.boolean().optional().default(false),
-    mfaSecret: z.string().optional(),
+    // mfaSecret: z.string().optional(),
     // role: z.nativeEnum(UserRole).optional().default(UserRole.USER), // Optional role modification
 });

@@ -2,7 +2,6 @@ import { cors } from "hono/cors";
 import app from "./app/app";
 import "./app/routes/api";
 import "./app/db/db"
-
 const PORT = process.env.PORT || 5002;
 // preflight cors handle
 app.options("*", cors());

@@ -11,13 +11,13 @@ function categoryControllers() {
         async createCategory(c: Context) {
             try {
                 const data = await c.req.json();
+                console.log("data", data)
+                
                 const result = await createCategory_func(data);
-
                 if (!result.success) {
                     return c.json({ success: false, message: result.message }, 400);
                 }
-
-                return c.json({ success: true, message: "Category created successfully", category: result.data });
+                return c.json({ success: true, message: "Category created successfully", category: result.data || null });
             } catch (err: any) {
                 return c.json({ success: false, message: err.message }, 500);
             }
