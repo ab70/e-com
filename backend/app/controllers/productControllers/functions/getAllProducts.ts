@@ -6,15 +6,15 @@ export const getAllProducts_func = async (userInfo: IUser, pagination: any) => {
     try {
         const { page, pageSize, all } = pagination;
 
-        const query = all === "true" ? {} : {};
+        // const query = all === "true" ? {} : {};
 
         const options = {
             skip: (page - 1) * pageSize,
             limit: parseInt(pageSize, 10),
         };
 
-        const products = await Product.find(query).skip(options.skip).limit(options.limit);
-        const totalProducts = await Product.countDocuments(query);
+        const products = await Product.find({}).skip(options.skip).limit(options.limit);
+        const totalProducts = await Product.countDocuments({});
 
         return {
             success: true,

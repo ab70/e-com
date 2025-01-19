@@ -8,7 +8,7 @@ export interface IProduct extends Document {
     stock: number;
     category: mongoose.Types.ObjectId; // Reference to Category schema
     images?: string[]; // Array of image URLs
-    vendor?: mongoose.Types.ObjectId; // Reference to Vendor schema
+    vendor: mongoose.Types.ObjectId; // Reference to Vendor schema
     varient?: {
         label: string;
         varients: {
@@ -39,7 +39,7 @@ const productSchema = new Schema(
         vendor: {
             type: Schema.Types.ObjectId,
             ref: "Vendor",
-            required: false,
+            required: true,
             default: null,
         },
         varient: {

@@ -3,7 +3,7 @@ import { z } from "@hono/zod-openapi";
 
 export enum UserRole {
     SUPER_ADMIN = "SUPER_ADMIN",
-    ADMIN = "ADMIN",
+    VENDOR_ADMIN = "VENDOR_ADMIN",
     MANAGER = "MANAGER",
     EMPLOYEE = "EMPLOYEE",
     USER = "USER"
@@ -76,6 +76,21 @@ export const modifyUserSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }).optional(),
     phoneNo: z.string().optional(),
     mfaEnabled: z.boolean().optional().default(false),
-    // mfaSecret: z.string().optional(),
-    // role: z.nativeEnum(UserRole).optional().default(UserRole.USER), // Optional role modification
+});
+
+// vendorAdmin signup
+export const vendorAdminSignupSchema = z.object({
+    email: z.string().email({ message: "Invalid email address" }),
+    password: z.string().min(8, { message: "Password must be at least 8 characters long" }),
+    firstName: z.string(),
+    lastName: z.string(),
+    phoneNo: z.string().optional(),
+    vendor: z.string().optional(),
+    role: z.nativeEnum(UserRole)
+        .optional()
+        .default(UserRole.VENDOR_ADMIN)
+        .refine(
+            (role) => role !== UserRole.SUPER_ADMIN,
+            { message: "SUPER_ADMIN role is not allowed" }
+        ),
 });

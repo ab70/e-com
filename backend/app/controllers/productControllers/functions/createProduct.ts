@@ -26,6 +26,7 @@ export const createProduct_func = async (userInfo: IUser, data: any, images?: an
         // Populate createdBy and updatedBy and vendor
         data.createdBy = userInfo._id;
         data.updatedBy = userInfo._id;
+        
         data.vendor = userInfo?.vendor;
 
         const newProduct = new Product(data);

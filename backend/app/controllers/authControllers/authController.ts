@@ -5,6 +5,8 @@ import { signinUser_func } from "./functions/signin";
 import { createSession } from "../../middlewares/sessionStore";
 import type { Context } from "hono";
 import { adminSignupUser_func } from "./functions/adminSignUp";
+import { vendorAdminSignup_func } from "./functions/vendorAdminSignUp";
+import { UserRole } from "../../models/User";
 
 function authControllers() {
     return {
@@ -44,7 +46,7 @@ function authControllers() {
                     { jwtData, exp: Date.now() + 60 * 60 * 15 },
                     process.env.JWT_SECRET as string
                 );
-                
+
                 await createSession(result.data._id as string, { accessToken });
 
                 await setSignedCookie(
@@ -76,6 +78,23 @@ function authControllers() {
                     return c.json({ success: false, message: result.message }, 400);
                 }
                 return c.json({ success: true, message: "Admin Signup successful", user: result.data });
+            } catch (err: any) {
+                return c.json({ success: false, message: err.message }, 500);
+            }
+        },
+        // SignUp vendorAdmin
+        async vendorAdminSignup(c: Context) {
+            try {
+                const data = await c.req.json();
+                const userInfo = await c.get("user");
+                if (![UserRole.SUPER_ADMIN, UserRole.VENDOR_ADMIN].includes(userInfo.role)) {
+                    return c.json({ success: false, message: "You are not allowed to sign up vendorAdmin" }, 400);
+                }
+                const result = await vendorAdminSignup_func(userInfo, data);
+                if (!result.success) {
+                    return c.json({ success: false, message: result.message }, 400);
+                }
+                return c.json({ success: true, message: "Vendor Admin Signup successful", user: result.data });
             } catch (err: any) {
                 return c.json({ success: false, message: err.message }, 500);
             }
