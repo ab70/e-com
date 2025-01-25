@@ -31,7 +31,7 @@ function brandControllers() {
 
         async updateBrand(c: Context) {
             try {
-                const id = c.req.param("id");
+                const id = c.req.query("id") as string;
                 const userInfo = c.get("user");
                 const { logo, ...others } = await c.req.parseBody({ all: true });
                 const data: IBrand = parseToObject(others) as IBrand;
@@ -44,7 +44,7 @@ function brandControllers() {
 
         async deleteBrand(c: Context) {
             try {
-                const id = c.req.param("id");
+                const id = c.req.query("id") as string;
                 const result = await deleteBrand_func(id);
                 return c.json(result, result.success ? 200 : 400);
 

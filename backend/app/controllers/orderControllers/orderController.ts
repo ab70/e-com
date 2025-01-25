@@ -40,7 +40,7 @@ function orderControllers() {
 
         async getOrderInfo(c: Context) {
             try {
-                const id = c.req.param("id");
+                const id = c.req.query("id") as string;
                 const result = await getOrderInfo_func(id);
 
                 if (!result.success) {
@@ -55,7 +55,7 @@ function orderControllers() {
 
         async adminModifyOrder(c: Context) {
             try {
-                const id = c.req.param("id");
+                const id = c.req.query("id") as string;
                 const data = await c.req.json();
                 const result = await adminModifyOrder_func(id, data);
 

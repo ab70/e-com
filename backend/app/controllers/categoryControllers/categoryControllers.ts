@@ -26,7 +26,7 @@ function categoryControllers() {
         // Get Category by ID
         async getCategory(c: Context) {
             try {
-                const id = c.req.param("id");
+                const id = c.req.query("id") as string;
                 const result = await getCategory_func(id);
 
                 if (!result.success) {
@@ -42,7 +42,7 @@ function categoryControllers() {
         // Update Category
         async updateCategory(c: Context) {
             try {
-                const id = c.req.param("id");
+                const id = c.req.query("id") as string;
                 const data = await c.req.json();
                 const result = await updateCategory_func(id, data);
 
@@ -59,7 +59,7 @@ function categoryControllers() {
         // Delete Category
         async deleteCategory(c: Context) {
             try {
-                const id = c.req.param("id");
+                const id = c.req.query("id") as string;
                 const result = await deleteCategory_func(id);
 
                 if (!result.success) {
@@ -74,7 +74,6 @@ function categoryControllers() {
         // get all categories
         async getCategories(c: Context) {
             try {
-                // const id = c.req.param("id");
                 const result = await getAllCategory_func();
 
                 if (!result.success) {
