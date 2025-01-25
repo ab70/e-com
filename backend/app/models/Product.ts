@@ -4,11 +4,12 @@ import { z } from "@hono/zod-openapi";
 export interface IProduct extends Document {
     name: string;
     description?: string;
+    brand?: mongoose.Types.ObjectId;
     price: number;
     stock: number;
-    category: mongoose.Types.ObjectId; // Reference to Category schema
-    images?: string[]; // Array of image URLs
-    vendor: mongoose.Types.ObjectId; // Reference to Vendor schema
+    category: mongoose.Types.ObjectId; 
+    images?: string[]; 
+    vendor: mongoose.Types.ObjectId; 
     varient?: {
         label: string;
         varients: {
@@ -19,14 +20,15 @@ export interface IProduct extends Document {
             images: string[];
         }[];
     };
-    createdBy: mongoose.Types.ObjectId; // Reference to User schema
-    updatedBy: mongoose.Types.ObjectId; // Reference to User schema
+    createdBy: mongoose.Types.ObjectId;
+    updatedBy: mongoose.Types.ObjectId;
 }
 
 const productSchema = new Schema(
     {
         name: { type: String, trim: true, required: true },
         description: { type: String, trim: true },
+        brand: { type: mongoose.Types.ObjectId, ref: "Brand", required: false },
         price: { type: Number, required: true, min: 0 },
         stock: { type: Number, required: true, min: 0 },
         category: {
@@ -77,21 +79,21 @@ export const Product = mongoose.model<IProduct>("Product", productSchema);
 export const ProductPostSchema = z.object({
     name: z.string().min(1, { message: "Product name is required" }),
     description: z.string().optional(),
+    brand: z.string().min(1, { message: "Brand ID is required" }),
     price:  z.preprocess((val) => parseFloat(val as string), z.number().min(0)),
     stock:z.preprocess((val) => parseInt(val as string, 10), z.number().min(0)),
     category: z.string().min(1, { message: "Category ID is required" }),
     images: z.array(z.any().openapi({type: "string", format: "binary"})),
     varient: z
     .preprocess((val) => {
-        // Parse the string if it's a stringified JSON
         if (typeof val === "string") {
             try {
                 return JSON.parse(val);
             } catch (error) {
-                return {}; // Default to an empty object if parsing fails
+                return {};
             }
         }
-        return val; // If already an object, return as-is
+        return val; 
     }, 
     z.object({
         label: z.string().optional(),

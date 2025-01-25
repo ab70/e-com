@@ -16,6 +16,7 @@
   "dependencies": {
     "@hono/swagger-ui": "^0.5.0",
     "@hono/zod-openapi": "^0.16.0",
+    "@scalar/hono-api-reference": "^0.5.168",
     "hono": "^4.6.15",
     "mime-types": "^2.1.35",
     "mongoose": "^8.9.3"

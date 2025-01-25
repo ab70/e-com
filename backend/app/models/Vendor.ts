@@ -12,7 +12,7 @@ export enum VendorTypeEnum {
 export interface IVendor extends Document {
     vendorName: string;
     vendorDetails?: string;
-    logo?: string; // URL for vendor logo
+    logo?: string;
     vendorAddress: {
         street: string;
         city: string;
@@ -21,8 +21,8 @@ export interface IVendor extends Document {
         postalCode?: string;
     }[];
     vendorType: VendorTypeEnum;
-    createdBy: mongoose.Types.ObjectId; // Reference to User schema
-    updatedBy: mongoose.Types.ObjectId; // Reference to User schema
+    createdBy: mongoose.Types.ObjectId;
+    updatedBy: mongoose.Types.ObjectId;
 }
 
 const vendorSchema = new Schema<IVendor>(

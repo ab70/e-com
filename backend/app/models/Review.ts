@@ -3,13 +3,13 @@ import { z } from "@hono/zod-openapi";
 
 
 export interface IReview extends Document {
-    product: mongoose.Types.ObjectId; // Reference to Product schema
-    user: mongoose.Types.ObjectId; // Reference to User schema
-    rating: number; // Rating out of 5
-    review: string; // Review text
+    product: mongoose.Types.ObjectId;
+    user: mongoose.Types.ObjectId;
+    rating: number;
+    review: string;
     reply?: {
-        vendor: mongoose.Types.ObjectId; // Reference to Vendor schema
-        replyText: string; // Vendor's reply
+        vendor: mongoose.Types.ObjectId;
+        replyText: string; 
         repliedAt: Date; 
     };
     createdAt: Date;
