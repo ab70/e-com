@@ -27,7 +27,7 @@ app.get(
         theme: 'purple',
         layout: "classic",
         tagsSorter: "alpha",
-        servers: [{ url: "http://localhost:5002" }, { url: "https://api.aloit.dev" }],
+        servers: [{ url: "http://localhost:5002" }, { url: "http://192.168.0.108:5002" }],
         favicon: "",
         spec: {
             url: '/api/ecom/openapi-json'

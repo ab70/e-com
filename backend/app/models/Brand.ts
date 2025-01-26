@@ -36,8 +36,10 @@ export const Brand = mongoose.model<IBrand>("Brand", brandSchema);
 // Validation Schemas using Zod
 export const BrandPostSchema = z.object({
     name: z.string().min(1, { message: "Brand name is required" }),
-    logo: z.any().openapi({ type: "string", format: "binary" }),
-    category: z.string().min(1, { message: "Category ID is required" }),
-    createdBy: z.string().min(1, { message: "Creator ID is required" }),
-    updatedBy: z.string().optional(),
+    logo: z.instanceof(Blob).or(z.instanceof(File)).optional(),
+    // logo: z.union([
+    //     z.instanceof(Blob).or(z.instanceof(File)),
+    //     z.array(z.instanceof(Blob).or(z.instanceof(File))),
+    // ]).optional(),
+    category: z.string().min(1, { message: "Category ID is required" })
 });

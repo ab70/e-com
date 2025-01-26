@@ -19,9 +19,6 @@ function userControllers() {
 
                 const result = await getUsers_func(userInfo, queries, pagination);
 
-                if (!result.success) {
-                    return c.json({ success: false, message: result.message }, 404);
-                }
                 return c.json(result, result.success ? 200 : 400);
             } catch (err: any) {
                 return c.json({ success: false, message: err.message }, 500);

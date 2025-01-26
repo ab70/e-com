@@ -1,4 +1,5 @@
 import { Order } from "../../../models/Order";
+import { handleError } from "../../../utils/types/errorHandle";
 
 export async function adminModifyOrder_func(id: string, data: any) {
     try {
@@ -10,13 +11,11 @@ export async function adminModifyOrder_func(id: string, data: any) {
         if (data.status) {
             order.status = data.status;
         }
-
-
         order.updatedBy = data.updatedBy;
         const updatedOrder = await order.save();
 
         return { success: true, data: updatedOrder };
     } catch (error: any) {
-        return { success: false, message: error.message };
+        return handleError(error);
     }
 }

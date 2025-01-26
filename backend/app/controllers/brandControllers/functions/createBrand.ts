@@ -3,10 +3,12 @@ import { Brand, type IBrand } from "../../../models/Brand";
 import type { IUser } from "../../../models/User";
 import { handleError } from "../../../utils/types/errorHandle";
 import { saveFile } from "../../../middlewares/upload";
+import { Category } from "../../../models/Category";
 
 export async function createBrand_func(userInfo: IUser, data: IBrand, logo?: any) {
     try {
-        const categoryExists = await Brand.findById(data.category);
+        const categoryId = new mongoose.Types.ObjectId(data.category);
+        const categoryExists = await Category.findById(categoryId);
         if (!categoryExists) {
             return { success: false, message: "Category not found.", data: null };
         }

@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
-import { Order } from "../../../models/Order";
+import { Order, OrderStatus } from "../../../models/Order";
 import { Product } from "../../../models/Product";
 import type { IUser } from "../../../models/User";
+import { handleError } from "../../../utils/types/errorHandle";
 
 export async function createOrder_func(userInfo: IUser, data: any) {
     const session = await mongoose.startSession();
@@ -10,36 +11,50 @@ export async function createOrder_func(userInfo: IUser, data: any) {
     try {
         const productData = await Promise.all(
             data.products.map(async (p: any) => {
-                const product = await Product.findById(p.product).session(session);
+                const product = await Product.findOneAndUpdate(
+                    { _id: p.product, stock: { $gte: p.quantity } }, // Atomic stock check and decrement
+                    { $inc: { stock: -p.quantity } },
+                    { new: true, session }
+                );
+
                 if (!product) {
-                    throw new Error(`Product not found: ${p.product}`);
+                    throw new Error(`Insufficient stock or product not found: ${p.product}`);
+                    // return { success: false, message: `Insufficient stock or product not found: ${p.product}` };
                 }
-                if (product.stock < p.quantity) {
-                    throw new Error(`Insufficient stock for product: ${product.name}`);
-                }
-                
-                // Reduce stock
-                product.stock -= p.quantity;
-                await product.save({ session });
+
+                // Calculate the discounted price if the discount is active
+                const now = new Date();
+                const isDiscountActive =
+                    product.discount &&
+                    product.discount.startAt &&
+                    product.discount.endAt &&
+                    now >= product.discount.startAt &&
+                    now <= product.discount.endAt;
+
+                const discountedPrice = isDiscountActive ? product.discount.price : product.price;
 
                 return {
                     product: product._id,
                     name: product.name,
-                    price: product.price,
+                    price: product.price, // Original price
+                    discountedPrice, // Price after discount (if applicable)
                     quantity: p.quantity,
                     images: product.images,
                 };
             })
         );
 
-        const totalPrice = productData.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        // Calculate total price based on the discounted price
+        const totalPrice = productData.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0);
 
         // Create the order
         const order = new Order({
             customer: userInfo._id,
             products: productData,
             totalPrice,
-            status: data.status || "Pending",
+            status: OrderStatus.PENDING,
+            deliveryAddress: data.deliveryAddress,
+            paymentMethod: data.paymentMethod || "COD",
             createdBy: userInfo._id,
         });
 
@@ -49,11 +64,11 @@ export async function createOrder_func(userInfo: IUser, data: any) {
         await session.commitTransaction();
         session.endSession();
 
-        return { success: true, data: savedOrder };
+        return { success: true, message: "Order created successfully", data: savedOrder };
     } catch (error: any) {
-        // Abort the transaction on error
+        // Rollback transaction on error
         await session.abortTransaction();
         session.endSession();
-        return { success: false, message: error.message };
+        return handleError(error);
     }
 }

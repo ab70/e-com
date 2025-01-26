@@ -7,9 +7,14 @@ export interface IProduct extends Document {
     brand?: mongoose.Types.ObjectId;
     price: number;
     stock: number;
-    category: mongoose.Types.ObjectId; 
-    images?: string[]; 
-    vendor: mongoose.Types.ObjectId; 
+    discount: {
+        price: number;
+        startAt: Date;
+        endAt: Date;
+    };
+    category: mongoose.Types.ObjectId;
+    images?: string[];
+    vendor: mongoose.Types.ObjectId;
     varient?: {
         label: string;
         varients: {
@@ -31,6 +36,11 @@ const productSchema = new Schema(
         brand: { type: mongoose.Types.ObjectId, ref: "Brand", required: false },
         price: { type: Number, required: true, min: 0 },
         stock: { type: Number, required: true, min: 0 },
+        discount: {
+            price: { type: Number, default: 0 },
+            startAt: { type: Date, default: null },
+            endAt: { type: Date, default: null }
+        },
         category: {
             type: mongoose.Types.ObjectId,
             ref: "Category",
@@ -80,31 +90,36 @@ export const ProductPostSchema = z.object({
     name: z.string().min(1, { message: "Product name is required" }),
     description: z.string().optional(),
     brand: z.string().min(1, { message: "Brand ID is required" }),
-    price:  z.preprocess((val) => parseFloat(val as string), z.number().min(0)),
-    stock:z.preprocess((val) => parseInt(val as string, 10), z.number().min(0)),
+    price: z.preprocess((val) => parseFloat(val as string), z.number().min(0)),
+    stock: z.preprocess((val) => parseInt(val as string, 10), z.number().min(0)),
+    discount: z.object({
+        price: z.preprocess((val) => parseFloat(val as string), z.number().min(0)),
+        startAt: z.preprocess((val) => new Date(val as string), z.string().min(1)).optional(),
+        endAt: z.preprocess((val) => new Date(val as string), z.string().min(1)).optional(),
+    }),
     category: z.string().min(1, { message: "Category ID is required" }),
-    images: z.array(z.any().openapi({type: "string", format: "binary"})),
+    images: z.array(z.any().openapi({ type: "string", format: "binary" })),
     varient: z
-    .preprocess((val) => {
-        if (typeof val === "string") {
-            try {
-                return JSON.parse(val);
-            } catch (error) {
-                return {};
+        .preprocess((val) => {
+            if (typeof val === "string") {
+                try {
+                    return JSON.parse(val);
+                } catch (error) {
+                    return {};
+                }
             }
-        }
-        return val; 
-    }, 
-    z.object({
-        label: z.string().optional(),
-        varients: z.array(
+            return val;
+        },
             z.object({
-                name: z.string(),
-                price: z.number(), // Ensure price is number
-                stock: z.number(), // Ensure stock is number
-                description: z.string(),
-                images: z.array(z.string()).optional(),
-            })
-        ).optional().default([]),
-    }).optional()),
+                label: z.string().optional(),
+                varients: z.array(
+                    z.object({
+                        name: z.string(),
+                        price: z.number(),
+                        stock: z.number(),
+                        description: z.string(),
+                        images: z.array(z.string()).optional(),
+                    })
+                ).optional().default([]),
+            }).optional()),
 });

@@ -1,4 +1,5 @@
 import { Order } from "../../../models/Order";
+import { handleError } from "../../../utils/types/errorHandle";
 
 export async function getAllOrders_func(page: number, pageSize: number) {
     try {
@@ -24,6 +25,6 @@ export async function getAllOrders_func(page: number, pageSize: number) {
             },
         };
     } catch (error: any) {
-        return { success: false, message: error.message };
+        return handleError(error);
     }
 }

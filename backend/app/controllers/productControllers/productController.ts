@@ -13,7 +13,7 @@ function productControllers() {
             try {
                 const { images, ...others } = await c.req.parseBody({ all: true });
                 console.log("others", others)
-                
+
                 const data: IProduct = parseToObject(others) as IProduct;
                 const userInfo = c.get("user");
                 const result = await createProduct_func(userInfo, data, images);
@@ -28,7 +28,13 @@ function productControllers() {
                 const page = parseInt(c.req.query("page") as string) || 1;
                 const pageSize = parseInt(c.req.query("pageSize") as string) || 10;
                 const all = c.req.query("all") as string || "false";
-                const pagination = { page, pageSize, all };
+                const query = JSON.parse(c.req.query("query") as string || "{}") || {} ;
+                const pagination = {
+                    page,
+                    pageSize,
+                    all,
+                    query
+                };
                 const userInfo = c.get("user");
                 const result = await getAllProducts_func(userInfo, pagination);
                 return c.json(result, result.success ? 200 : 400);

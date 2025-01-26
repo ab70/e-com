@@ -60,8 +60,41 @@ export const checkAdmin = async (c: Context, next: any) => {
                 role: userInfo?.role,
                 mfaEnabled: userInfo?.mfaEnabled
             })
-            if (![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(userInfo?.role as any)) {
-                return c.json({ success: false, message: "Unauthorized" }, 401)
+            if (![UserRole.SUPER_ADMIN].includes(userInfo?.role as any)) {
+                return c.json({ success: false, message: "Only super Admin has access" }, 401)
+            }
+
+            await next()
+        }
+        return c.json({ success: false, message: "Not authorized" })
+    } catch (err: any) {
+        console.log(err);
+
+        return c.json({ success: false, message: err.message }, 500)
+    }
+}
+export const checkVendor = async (c: Context, next: any) => {
+    try {
+        const token = await getSignedCookie(c, process.env.JWT_SECRET || '', 'ecom_token');
+        if (token) {
+            const decodedToken: TokenType = await verify(token, process.env.JWT_SECRET || '') as TokenType;
+            let userInfo = null;
+            if (!decodedToken.jwtData) return c.json({ success: false, message: "Not authorized" })
+            const sessionData = await getSession(decodedToken?.jwtData?.id);
+            if (!sessionData) return c.json({ success: false, message: "Not authorized" }, 401);
+            userInfo = await User.findOne({ _id: sessionData?.user_Id });
+            c.set('user', userInfo)
+
+            c.set('session', {
+                _id: userInfo?._id,
+                email: userInfo?.email,
+                firstName: userInfo?.firstName,
+                lastName: userInfo?.lastName,
+                role: userInfo?.role,
+                mfaEnabled: userInfo?.mfaEnabled
+            })
+            if (![UserRole.VENDOR_ADMIN].includes(userInfo?.role as any)) {
+                return c.json({ success: false, message: "Only Vendor Admin has access" }, 401)
             }
 
             await next()
