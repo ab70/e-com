@@ -2,9 +2,14 @@ import { cors } from "hono/cors";
 import app from "./app/app";
 import "./app/routes/api";
 import "./app/db/db"
-const PORT = process.env.PORT || 5002;
+const PORT = process.env.PORT || 6002;
 // preflight cors handle
-app.options("*", cors());
+app.options("*", cors({
+  origin: "*",
+}));
+app.use(cors({
+  origin: "*"
+}));
 // Middleware to handle session for each request
 
 // import("./app/events/consumers/index")
