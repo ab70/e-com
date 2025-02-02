@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { z } from "@hono/zod-openapi";
-
+import { FieldTypes, type IFeature } from "./Features";
 export interface IProduct extends Document {
     name: string;
     description?: string;
@@ -25,6 +25,7 @@ export interface IProduct extends Document {
             images: string[];
         }[];
     };
+    features?: IFeature[];
     createdBy: mongoose.Types.ObjectId;
     updatedBy: mongoose.Types.ObjectId;
 }
@@ -64,6 +65,25 @@ const productSchema = new Schema(
                 images: { type: [String], default: [] },
             }]
         },
+        features: [
+            {
+                fieldName: { type: String, trim: true },
+                fieldLabel: { type: String, trim: true },
+                fieldType: {
+                    type: String,
+                    enum: Object.values(FieldTypes)
+                },
+                options: [
+                    {
+                        value: { type: String, trim: true },
+                        label: { type: String, trim: true },
+                    },
+                ],
+                required: { type: Boolean, default: false },
+                fieldValue: { type: String, trim: true },
+                defaultValue: { type: String, trim: true },
+            },
+        ],
         createdBy: { type: mongoose.Types.ObjectId, ref: "User" },
         updatedBy: { type: mongoose.Types.ObjectId, ref: "User" },
     },
@@ -122,4 +142,20 @@ export const ProductPostSchema = z.object({
                     })
                 ).optional().default([]),
             }).optional()),
+    features: z.array(
+        z.object({
+            fieldName: z.string().min(1, { message: "Field name is required" }),
+            fieldLabel: z.string().min(1, { message: "Field label is required" }),
+            fieldType: z.nativeEnum(FieldTypes),
+            options: z.array(
+                z.object({
+                    value: z.string().min(1, { message: "Option value is required" }),
+                    label: z.string().min(1, { message: "Option label is required" }),
+                })
+            ).optional(),
+            required: z.boolean().optional(),
+            fieldValue: z.string().optional(),
+            defaultValue: z.string().optional(),
+        })
+    ).optional().default([]),
 });
