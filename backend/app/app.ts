@@ -27,7 +27,10 @@ app.get(
         theme: 'purple',
         layout: "classic",
         tagsSorter: "alpha",
-        servers: [{ url: "http://localhost:6002" }, { url: "http://192.168.0.108:6002" }],
+        servers: [{ url: "http://localhost:6002" }, 
+                  { url: "http://192.168.0.108:6002" },
+                  { url: "http://10.10.10.22:6002" }
+                 ],
         favicon: "",
         spec: {
             url: '/api/ecom/openapi-json'
