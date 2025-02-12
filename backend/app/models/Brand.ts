@@ -13,7 +13,7 @@ const brandSchema: Schema<IBrand> = new Schema(
     {
         name: { type: String, trim: true, required: true, unique: true },
         logo: { type: String, trim: true },
-        category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
+        category: { type: Schema.Types.ObjectId, ref: "Category", required: false },
         createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
         updatedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
     },

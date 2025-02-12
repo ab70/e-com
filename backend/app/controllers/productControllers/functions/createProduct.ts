@@ -28,7 +28,10 @@ export const createProduct_func = async (userInfo: IUser, data: any, images?: an
         data.updatedBy = userInfo._id;
         
         data.vendor = userInfo?.vendor;
-
+        console.log("Data", data);
+        if(data.features == ""){
+            delete data.features;
+        }
         const newProduct = new Product(data);
         await newProduct.save();
 

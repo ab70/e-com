@@ -13,10 +13,9 @@ export const updateProduct_func = async (userInfo: IUser, id: string, data: any)
         if(data?.vendor){
             delete data.vendor;
         }
-
-        // Ensure the updater has permission
-        if (product.createdBy.toString() !== userInfo._id) {
-            return { success: false, message: "Unauthorized to update this product" };
+        // ensure the product vendor is the same as the user vendor
+        if(!product.vendor.equals(userInfo.vendor)){
+            return { success: false, message: "You dont own this product" };
         }
 
         // Handle file uploads if provided
@@ -37,7 +36,7 @@ export const updateProduct_func = async (userInfo: IUser, id: string, data: any)
 
         // Update fields
         Object.assign(product, data);
-        product.updatedBy = new mongoose.Types.ObjectId(userInfo._id);
+        product.updatedBy = new mongoose.Types.ObjectId(userInfo._id as string);
 
         await product.save();
 

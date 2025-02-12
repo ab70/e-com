@@ -3,7 +3,7 @@ import { handleError } from "../../../utils/types/errorHandle";
 
 export async function getAllBrands_func() {
     try {
-        const brand = await Brand.findById({}).populate("category");
+        const brand = await Brand.find({}).populate("category");
         if (!brand) {
             return { success: false, message: "Brand not found.", data: null };
         }
