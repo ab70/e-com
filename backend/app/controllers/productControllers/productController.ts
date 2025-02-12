@@ -16,7 +16,7 @@ function productControllers() {
 
                 const data: IProduct = parseToObject(others) as IProduct;
                 const userInfo = c.get("user");
-                const result = await createProduct_func(userInfo, data, images);
+                const result = await createProduct_func(userInfo, data);
                 return c.json(result, result.success ? 200 : 400);
             } catch (err: any) {
                 return c.json(err.message, 500);

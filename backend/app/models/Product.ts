@@ -55,9 +55,9 @@ const productSchema = new Schema(
             required: true,
             default: null,
         },
-        varient: {
+        varients: {
             label: { type: String, },
-            varients: [{
+            varient: [{
                 name: { type: String, default: "" },
                 price: { type: Number, default: 0 },
                 stock: { type: Number, default: 0 },
@@ -110,77 +110,43 @@ export const ProductPostSchema = z.object({
     name: z.string().min(1, { message: "Product name is required" }),
     description: z.string().optional(),
     brand: z.string().min(1, { message: "Brand ID is required" }),
-    price: z.preprocess((val) => parseFloat(val as string), z.number().min(0)),
-    stock: z.preprocess((val) => parseInt(val as string, 10), z.number().min(0)),
-    discount: z
-        .preprocess((val) => {
-            if (typeof val === "string") {
-                try {
-                    return JSON.parse(val);
-                } catch (error) {
-                    return {};
-                }
-            }
-            return val;
-        },
-            z.object(
-                {
-                    price: z.preprocess((val) => parseFloat(val as string), z.number()),
-                    startAt: z.string(),
-                    endAt: z.string(),
-                }
-            ).optional()),
+    price: z.number().min(0),
+    stock: z.number().min(0),
+    discount: z.object(
+        {
+            price: z.preprocess((val) => parseFloat(val as string), z.number()),
+            startAt: z.string(),
+            endAt: z.string(),
+        }
+    ).optional(),
     category: z.string().min(1, { message: "Category ID is required" }),
     images: z.array(z.any().openapi({ type: "string", format: "binary" })),
-    varient: z
-        .preprocess((val) => {
-            if (typeof val === "string") {
-                try {
-                    return JSON.parse(val);
-                } catch (error) {
-                    return {};
-                }
-            }
-            return val;
-        },
+    varients: z.object({
+        label: z.string().optional(),
+        varient: z.array(
             z.object({
-                label: z.string().optional(),
-                varients: z.array(
-                    z.object({
-                        name: z.string(),
-                        price: z.number(),
-                        stock: z.number(),
-                        description: z.string(),
-                        images: z.array(z.string()).optional(),
-                    })
-                ).optional().default([]),
-            }).optional()),
-    features: 
-            z.preprocess((val) => {
-                if (typeof val === "string") {
-                    try {
-                        return JSON.parse(val);
-                    } catch (error) {
-                        return [];
-                    }
-                }
-                return val;
-            },
-            z.array(
+                name: z.string(),
+                price: z.number(),
+                stock: z.number(),
+                description: z.string(),
+                images: z.array(z.string()).optional(),
+            })
+        ).optional().default([]),
+    }).optional(),
+    features: z.array(
+        z.object({
+            fieldName: z.string().min(1, { message: "Field name is required" }),
+            fieldLabel: z.string().min(1, { message: "Field label is required" }),
+            fieldType: z.nativeEnum(FieldTypes),
+            options: z.array(
                 z.object({
-                    fieldName: z.string().min(1, { message: "Field name is required" }),
-                    fieldLabel: z.string().min(1, { message: "Field label is required" }),
-                    fieldType: z.nativeEnum(FieldTypes),
-                    options: z.array(
-                        z.object({
-                            value: z.string().min(1, { message: "Option value is required" }),
-                            label: z.string().min(1, { message: "Option label is required" }),
-                        })
-                    ).optional(),
-                    required: z.boolean().optional(),
-                    fieldValue: z.string().optional(),
-                    defaultValue: z.string().optional(),
+                    value: z.string().min(1, { message: "Option value is required" }),
+                    label: z.string().min(1, { message: "Option label is required" }),
                 })
-            ).optional().default([]),
-            ),
+            ).optional(),
+            required: z.boolean().optional(),
+            fieldValue: z.string().optional(),
+            defaultValue: z.string().optional(),
+        })
+    ).optional().default([]),
 });

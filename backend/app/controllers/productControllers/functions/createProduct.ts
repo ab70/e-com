@@ -1,35 +1,18 @@
-import { saveFile } from "../../../middlewares/upload";
-import { Product } from "../../../models/Product";
+import mongoose from "mongoose";
+import { Product, type IProduct } from "../../../models/Product";
 import  { type IUser } from "../../../models/User";
 import { handleError } from "../../../utils/types/errorHandle";
 
-export const createProduct_func = async (userInfo: IUser, data: any, images?: any) => {
+export const createProduct_func = async (userInfo: IUser, data: IProduct) => {
     try {
-        // Handle file uploads
-        let uploadedImages: string[] = [];
-        if (images) {
-            const imageArray = Array.isArray(images) ? images : [images];
-            uploadedImages = await Promise.all(
-                imageArray.map(async (image) => {
-                    try {
-                        return await saveFile(image);
-                    } catch (err) {
-                        console.error(`Error saving file: ${image.name}`, err);
-                        return null;
-                    }
-                })
-            ).then((paths) => paths.filter((path): path is string => path !== null));
-        }
-
-        data.images = uploadedImages;
-
         // Populate createdBy and updatedBy and vendor
-        data.createdBy = userInfo._id;
-        data.updatedBy = userInfo._id;
+        data.createdBy = new mongoose.Types.ObjectId(userInfo._id as string);
+        data.updatedBy = new mongoose.Types.ObjectId(userInfo._id as string);
         
-        data.vendor = userInfo?.vendor;
+        data.vendor = new mongoose.Types.ObjectId(userInfo?.vendor)
         console.log("Data", data);
-        if(data.features == ""){
+        // if features is not array or objects then delete it
+        if(Array.isArray(data?.features)){
             delete data.features;
         }
         const newProduct = new Product(data);

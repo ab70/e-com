@@ -46,7 +46,7 @@ export const Post = (data: { path: string, tags: string[], middleware?: any[], s
 };
 
 
-export const Patch = (data: { path: string, query?: any, tags: string[], middleware?: any[], schema: any, type?: string }) => {
+export const Patch = (data: { path: string, query?: any, tags: string[], middleware?: any[], schema: any, type?: string, summary?: any }) => {
     return createRoute({
         tags: data.tags,
         method: "patch",
@@ -62,6 +62,7 @@ export const Patch = (data: { path: string, query?: any, tags: string[], middlew
                 }
             }
         },
+        summary: data.summary,
         responses: commonResponses
     });
 };
