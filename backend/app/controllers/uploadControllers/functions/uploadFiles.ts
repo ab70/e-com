@@ -3,6 +3,9 @@ import path from 'path';
 import AWS from 'aws-sdk';
 import { Readable } from 'stream';
 import mime from 'mime-types';
+import { File } from '../../../models/File';
+import type { IUser } from '../../../models/User';
+
 
 // 🌟 Environment Variables
 const STORAGE_TYPE = process.env.STORAGE_TYPE || "local"; // "s3", "minio", or "local"
@@ -20,36 +23,38 @@ const s3 = new AWS.S3({
 const BUCKET_NAME = process.env.S3_BUCKET_NAME || "storage-bucket";
 
 // 📌 Secure & Unified Multi-File Storage Function
-export const saveFile_func = async (files: any[]): Promise<string[]> => {
+export const saveFile_func = async (files: any[], userInfo: IUser): Promise<string[]> => {
     try {
         if (!files || files.length === 0) throw new Error("No files uploaded.");
+        if (!userInfo._id) throw new Error("Invalid user.");
 
         const savedFileNames: string[] = [];
 
         for (const file of files) {
             console.log("Uploading file:", file.name);
 
-            // Sanitize file name
+            // Sanitize filename
             const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9_.-]/g, "_");
-            const fileName = `${Date.now()}_${sanitizedFileName}`;
+
+            // Generate unique filename
+            const timestamp = Date.now();
+            const fileName = `${timestamp}_${sanitizedFileName}`;
             const buffer = Buffer.from(await file.arrayBuffer());
 
             // Validate MIME type
             const mimeType = mime.lookup(file.name);
             if (!mimeType || !['image/jpeg', 'image/png', 'application/pdf'].includes(mimeType)) {
                 console.warn(`Unsupported file type skipped: ${mimeType}`);
-                continue; // Skip invalid files instead of failing all
+                continue; // Skip invalid files
             }
 
             if (STORAGE_TYPE === "local") {
-                // 🌟 Save file to local storage
                 if (!existsSync(LOCAL_UPLOAD_PATH)) {
                     await fsPromises.mkdir(LOCAL_UPLOAD_PATH, { recursive: true });
                 }
                 const filePath = path.join(LOCAL_UPLOAD_PATH, fileName);
                 await fsPromises.writeFile(filePath, buffer);
             } else {
-                // 🌟 Upload to S3 / MinIO
                 const uploadParams = {
                     Bucket: BUCKET_NAME,
                     Key: fileName,
@@ -59,7 +64,11 @@ export const saveFile_func = async (files: any[]): Promise<string[]> => {
                 await s3.upload(uploadParams).promise();
             }
 
-            savedFileNames.push(fileName); // Store only the filename
+            // 🔹 Store file metadata in MongoDB
+            // await File.cate({ filename: fileName, userId, vendorId, role });
+            const newFile = new File({filename: fileName, userId: userInfo._id, vendorId: userInfo?.vendor, role: userInfo.role })
+            await newFile.save();
+            savedFileNames.push(fileName);
         }
 
         return savedFileNames;
