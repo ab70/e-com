@@ -2,6 +2,7 @@ import { existsSync, unlinkSync } from 'fs';
 import path from 'path';
 import AWS from 'aws-sdk';
 import { File } from '../../../models/File';
+import { UserRole, type IUser } from '../../../models/User';
 
 // 🌟 Environment Variables
 const STORAGE_TYPE = process.env.STORAGE_TYPE || "local";
@@ -43,14 +44,14 @@ const performDeletion = async (fileNames: string[]): Promise<{ success: boolean 
 };
 
 // 📌 Secure File Deletion with Ownership Validation
-export const deleteFile_func = async (fileNames: string[], userInfo: any) => {
+export const deleteFile_func = async (fileNames: string[], userInfo: IUser) => {
     try {
         if (!fileNames || !Array.isArray(fileNames) || fileNames.length === 0) {
             throw new Error("No file names provided.");
         }
 
         // 🔹 Super Admin can delete any file
-        if (userInfo.role === "super-admin") {
+        if (userInfo.role === UserRole.SUPER_ADMIN) {
             return await performDeletion(fileNames);
         }
 
@@ -66,15 +67,29 @@ export const deleteFile_func = async (fileNames: string[], userInfo: any) => {
         const authorizedFiles: string[] = [];
 
         for (const file of files) {
-            if (
-                file.userId.toString() !== userInfo._id &&  // Must match user ID
-                (file.vendorId?.toString() !== userInfo.vendor) && // Must match vendor (for admins)
-                userInfo.role !== "admin"  // Admins can manage vendor files
-            ) {
-                unauthorizedFiles.push(file.filename);
-            } else {
-                authorizedFiles.push(file.filename);
-            }
+            // if (
+            //     file.userId.toString() !== userInfo._id &&  // Must match user ID
+            //     (file.vendorId?.toString() !== userInfo.vendor) && // Must match vendor (for admins)
+            //     userInfo.role !== "admin"  // Admins can manage vendor files
+            // ) {
+            //     unauthorizedFiles.push(file.filename);
+            // } else {
+            //     authorizedFiles.push(file.filename);
+            // }
+            if(userInfo?.vendor){
+                // vendor admin can delete its files
+                if (file.vendorId?.toString() !== userInfo.vendor.toJSON()) {
+                    unauthorizedFiles.push(file.filename);
+                } else {
+                    authorizedFiles.push(file.filename);
+                }
+            }else {
+                if (file.userId.toString() !== userInfo?._id?.toString()) {
+                    unauthorizedFiles.push(file.filename);
+                } else {
+                    authorizedFiles.push(file.filename);
+                }
+            }            
         }
 
         // 🔹 If unauthorized files exist, return failure with details
