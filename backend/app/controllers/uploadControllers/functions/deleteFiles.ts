@@ -8,17 +8,16 @@ import { UserRole, type IUser } from '../../../models/User';
 const STORAGE_TYPE = process.env.STORAGE_TYPE || "local";
 const LOCAL_UPLOAD_PATH = path.join(process.cwd(), "uploads");
 
-// AWS S3 / MinIO Configuration
 const s3 = new AWS.S3({
-    accessKeyId: process.env.MINIO_ACCESS_KEY,
-    secretAccessKey: process.env.MINIO_SECRET_KEY,
-    endpoint: process.env.MINIO_ENDPOINT,
+    accessKeyId: process.env.S3_ACCESS_KEY,
+    secretAccessKey: process.env.S3_SECRET_KEY,
+    endpoint: process.env.S3_ENDPOINT,
     s3ForcePathStyle: true,
     signatureVersion: 'v4',
 });
-const BUCKET_NAME = process.env.S3_BUCKET_NAME || "storage-bucket";
+const BUCKET_NAME = process.env.S3_BUCKET_NAME || "ecom-bucket";
 // 📌 Helper function to perform file deletion
-const performDeletion = async (fileNames: string[]): Promise<{ success: boolean }> => {
+const performDeletion = async (fileNames: string[]): Promise<{ success: boolean, message: string }> => {
     try {
         for (const fileName of fileNames) {
             if (STORAGE_TYPE === "local") {
@@ -36,10 +35,10 @@ const performDeletion = async (fileNames: string[]): Promise<{ success: boolean 
             await File.deleteOne({ filename: fileName });
         }
 
-        return { success: true };
+        return { success: true, message: "Files deleted successfully" };
     } catch (error: any) {
         console.error("File deletion error:", error.message);
-        return { success: false };
+        return { success: false, message: error.message };
     }
 };
 
@@ -50,46 +49,37 @@ export const deleteFile_func = async (fileNames: string[], userInfo: IUser) => {
             throw new Error("No file names provided.");
         }
 
-        // 🔹 Super Admin can delete any file
+        // Super Admin can delete any file
         if (userInfo.role === UserRole.SUPER_ADMIN) {
             return await performDeletion(fileNames);
         }
 
-        // 🔹 Fetch files from the database to check ownership
+        // Fetch files from the database to check ownership
         const files = await File.find({ filename: { $in: fileNames } });
 
         if (!files || files.length === 0) {
             throw new Error("No matching files found.");
         }
 
-        // 🔹 Filter files based on ownership
+        //Filter files based on ownership
         const unauthorizedFiles: string[] = [];
         const authorizedFiles: string[] = [];
 
         for (const file of files) {
-            // if (
-            //     file.userId.toString() !== userInfo._id &&  // Must match user ID
-            //     (file.vendorId?.toString() !== userInfo.vendor) && // Must match vendor (for admins)
-            //     userInfo.role !== "admin"  // Admins can manage vendor files
-            // ) {
-            //     unauthorizedFiles.push(file.filename);
-            // } else {
-            //     authorizedFiles.push(file.filename);
-            // }
-            if(userInfo?.vendor){
+            if (userInfo?.vendor) {
                 // vendor admin can delete its files
                 if (file.vendorId?.toString() !== userInfo.vendor.toJSON()) {
                     unauthorizedFiles.push(file.filename);
                 } else {
                     authorizedFiles.push(file.filename);
                 }
-            }else {
+            } else {
                 if (file.userId.toString() !== userInfo?._id?.toString()) {
                     unauthorizedFiles.push(file.filename);
                 } else {
                     authorizedFiles.push(file.filename);
                 }
-            }            
+            }
         }
 
         // 🔹 If unauthorized files exist, return failure with details
