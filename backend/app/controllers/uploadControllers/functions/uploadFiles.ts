@@ -23,12 +23,12 @@ const s3 = new AWS.S3({
 const BUCKET_NAME = process.env.S3_BUCKET_NAME || "ecom-bucket";
 
 // 📌 Secure & Unified Multi-File Storage Function
-export const saveFile_func = async (files: any[], userInfo: IUser): Promise<string[]> => {
+export const saveFile_func = async (files: any[], userInfo: IUser)=> {
     try {
         if (!files || files.length === 0) throw new Error("No files uploaded.");
         if (!userInfo._id) throw new Error("Invalid user.");
         const fileArray = Array.isArray(files) ? files : [files];
-        const savedFileNames: string[] = [];
+        const savedFileNames = [];
 
         for (const file of fileArray) {
             console.log("Uploading file:", file.name);
@@ -74,14 +74,13 @@ export const saveFile_func = async (files: any[], userInfo: IUser): Promise<stri
                 vendorId: userInfo?.vendor,
                 role: userInfo.role
             })
-            await newFile.save();
-            savedFileNames.push(fileName);
+            const savedFile = await newFile.save();
+            savedFileNames.push(savedFile);
         }
 
         return savedFileNames;
     } catch (error: any) {
         console.log(error);
-
         return [];
     }
 };
