@@ -24,6 +24,7 @@ const fileSchema = new Schema<IFile>(
     },
     { timestamps: true }
 );
+fileSchema.index({ filename: 1 }, { unique: true });
 
 export const File = mongoose.model<IFile>("File", fileSchema);
 
