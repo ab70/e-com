@@ -70,6 +70,7 @@ export const saveFile_func = async (files: any[], userInfo: IUser)=> {
             const newFile = new File({
                 serverPath: STORAGE_TYPE === "local" ? BASE_URL + fileName :  process.env.S3_ENDPOINT,
                 filename: fileName,
+                bucket: STORAGE_TYPE === "local" ? null : BUCKET_NAME,
                 userId: userInfo._id,
                 vendorId: userInfo?.vendor,
                 role: userInfo.role

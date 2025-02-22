@@ -5,6 +5,7 @@ import { UserRole } from "./User";
 export interface IFile extends Document {
     serverPath: string;
     filename: string;
+    bucket?: string;
     userId: mongoose.Types.ObjectId;
     vendorId?: mongoose.Types.ObjectId;
     role: UserRole;
@@ -15,6 +16,7 @@ const fileSchema = new Schema<IFile>(
     {
         serverPath: { type: String, trim: true, required: false, default: "" },
         filename: { type: String, trim: true, required: true },
+        bucket: { type: String, trim: true, required: false, default: null },
         userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
         vendorId: { type: mongoose.Types.ObjectId, ref: "Vendor" },
         role: { type: String, enum: Object.values(UserRole), required: true },
