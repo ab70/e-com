@@ -11,10 +11,7 @@ function productControllers() {
         // Create a new product
         async newProduct(c: Context) {
             try {
-                const { images, ...others } = await c.req.parseBody({ all: true });
-                console.log("others", others)
-
-                const data: IProduct = parseToObject(others) as IProduct;
+                const data = await c.req.json();
                 const userInfo = c.get("user");
                 const result = await createProduct_func(userInfo, data);
                 return c.json(result, result.success ? 200 : 400);
