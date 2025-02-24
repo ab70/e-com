@@ -32,8 +32,8 @@ function productControllers() {
                     all,
                     query
                 };
-                const userInfo = c.get("user");
-                const result = await getAllProducts_func(userInfo, pagination);
+                // const userInfo = c.get("user");
+                const result = await getAllProducts_func(pagination);
                 return c.json(result, result.success ? 200 : 400);
             } catch (err: any) {
                 return c.json(err.message, 500);

@@ -2,7 +2,7 @@ import { Product } from "../../../models/Product";
 import type { IUser } from "../../../models/User";
 import { handleError } from "../../../utils/types/errorHandle";
 
-export const getAllProducts_func = async (userInfo: IUser, pagination: any) => {
+export const getAllProducts_func = async (pagination: any) => {
     try {
         console.log("pagination", pagination);
 
@@ -28,7 +28,7 @@ export const getAllProducts_func = async (userInfo: IUser, pagination: any) => {
         };
 
         // Fetch products based on query and pagination
-        const products = await Product.find(query).skip(options.skip).limit(options.limit);
+        const products = await Product.find(query).populate("vendor category brand").skip(options.skip).limit(options.limit);
         const totalProducts = await Product.countDocuments(query);
 
         return {
