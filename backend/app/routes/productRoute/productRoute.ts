@@ -14,11 +14,10 @@ app.openapi(Get({
         page: z.string().default("1"),
         pageSize: z.string().default("10"),
         all: z.string().optional().default("false"),
-        query: z.object({
-            category: z.string().optional(),
-            brand: z.string().optional(),
-            vendor: z.string().optional()
-        }).optional().default({})
+        name: z.string().optional(),
+        category: z.string().optional(),
+        brand: z.string().optional(),
+        vendor: z.string().optional()
     }), tags: ["Product"]
 }), productControllers().getAllProducts);
 // Edit product

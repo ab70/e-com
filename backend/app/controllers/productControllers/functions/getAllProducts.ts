@@ -4,22 +4,23 @@ import { handleError } from "../../../utils/types/errorHandle";
 
 export const getAllProducts_func = async (pagination: any) => {
     try {
-        console.log("pagination", pagination);
-
         const {
             page = 1,
             pageSize = 10,
             all = false,
-            query = {},
+            name = "",
+            category = "",
+            brand = "",
+            vendor = "",
         } = pagination;
 
         // Construct the query object
         const queryObj: any = {};
 
-        if (query?.category !== "") queryObj.category = query?.category;
-        if (query?.brand !== "") queryObj.brand = query?.brand;
-        if (query?.vendor !== "") queryObj.vendor = query?.vendor;
-
+        if (category !== "") queryObj.category = category;
+        if (brand !== "") queryObj.brand = brand;
+        if (vendor !== "") queryObj.vendor = vendor;
+        if (name !== "") queryObj.name = name;
 
         // Pagination options
         const options = {
@@ -28,8 +29,8 @@ export const getAllProducts_func = async (pagination: any) => {
         };
 
         // Fetch products based on query and pagination
-        const products = await Product.find(query).populate("vendor category brand").skip(options.skip).limit(options.limit);
-        const totalProducts = await Product.countDocuments(query);
+        const products = await Product.find(queryObj).populate("vendor category brand").skip(options.skip).limit(options.limit);
+        const totalProducts = await Product.countDocuments(queryObj);
 
         return {
             success: true,

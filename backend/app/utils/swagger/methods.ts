@@ -11,7 +11,7 @@ const commonResponses = {
     },
 };
 
-export const Get = (data: { path: string, query?: any, tags: string[], middleware?: any[], summary?: string }) => {
+export const Get = (data: { path: string, query?: any, tags: string[], middleware?: any[], summary?: string, openapi?: any }) => {
     return createRoute({
         tags: data.tags,
         method: "get",
@@ -21,9 +21,11 @@ export const Get = (data: { path: string, query?: any, tags: string[], middlewar
         },
         summary: data.summary,
         middleware: data.middleware,
-        responses: commonResponses
+        responses: commonResponses,
+        openapi: data.openapi // 🔹 Allows passing custom OpenAPI parameters
     });
 };
+
 
 export const Post = (data: { path: string, tags: string[], middleware?: any[], schema: any, summary?: string, type?: string }) => {
     return createRoute({

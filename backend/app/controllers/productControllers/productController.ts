@@ -25,12 +25,18 @@ function productControllers() {
                 const page = parseInt(c.req.query("page") as string) || 1;
                 const pageSize = parseInt(c.req.query("pageSize") as string) || 10;
                 const all = c.req.query("all") as string || "false";
-                const query = JSON.parse(c.req.query("query") as string || "{}") || {} ;
+                const name = c.req.query("name") as string || "";
+                const category = c.req.query("category") as string || "";
+                const brand = c.req.query("brand") as string || "";
+                const vendor = c.req.query("vendor") as string || "";
                 const pagination = {
                     page,
                     pageSize,
                     all,
-                    query
+                    name,
+                    category,
+                    brand,
+                    vendor,
                 };
                 // const userInfo = c.get("user");
                 const result = await getAllProducts_func(pagination);
