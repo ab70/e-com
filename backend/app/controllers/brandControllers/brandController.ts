@@ -11,9 +11,8 @@ function brandControllers() {
         async createBrand(c: Context) {
             try {
                 const userInfo = c.get("user");
-                const { logo, ...others } = await c.req.parseBody({ all: true });
-                const data: IBrand = parseToObject(others) as IBrand;
-                const result = await createBrand_func(userInfo, data, logo);
+                const others = await c.req.json();
+                const result = await createBrand_func(userInfo, others);
                 return c.json(result, result.success ? 200 : 400);
             } catch (err: any) {
                 return c.json({ success: false, message: err.message }, 500);

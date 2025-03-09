@@ -4,7 +4,7 @@ import type { IUser } from "../../../models/User";
 import { handleError } from "../../../utils/types/errorHandle";
 import { Category } from "../../../models/Category";
 
-export async function createBrand_func(userInfo: IUser, data: IBrand, logo?: any) {
+export async function createBrand_func(userInfo: IUser, data: IBrand) {
     try {
         const categoryId = new mongoose.Types.ObjectId(data.category);
         const categoryExists = await Category.findById(categoryId);

@@ -3,16 +3,16 @@ import path from 'path';
 import AWS from 'aws-sdk';
 import { Readable } from 'stream';
 import mime from 'mime-types';
+import { v2 as cloudinary } from 'cloudinary';
 import { File } from '../../../models/File';
 import type { IUser } from '../../../models/User';
 
-
 // 🌟 Environment Variables
-const STORAGE_TYPE = process.env.STORAGE_TYPE || "local"; // "s3", or "local"
+const STORAGE_TYPE = process.env.STORAGE_TYPE || "local"; // "s3", "cloudinary", or "local"
 const BASE_URL = process.env.FILE_BASE_URL || "http://localhost:3000/uploads/";
 const LOCAL_UPLOAD_PATH = path.join(process.cwd(), "uploads");
 
-// 🌟 AWS S3 / MinIO Configuration
+// 🌟 AWS S3 Configuration
 const s3 = new AWS.S3({
     accessKeyId: process.env.S3_ACCESS_KEY,
     secretAccessKey: process.env.S3_SECRET_KEY,
@@ -22,11 +22,22 @@ const s3 = new AWS.S3({
 });
 const BUCKET_NAME = process.env.S3_BUCKET_NAME || "ecom-bucket";
 
-// 📌 Secure & Unified Multi-File Storage Function
-export const saveFile_func = async (files: any[], userInfo: IUser)=> {
+// 🌟 Cloudinary Configuration
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+/**
+ * 📌 Secure & Unified Multi-File Storage Function
+ * Supports Local Storage, AWS S3, and Cloudinary
+ */
+export const saveFile_func = async (files: any[], userInfo: IUser) => {
     try {
         if (!files || files.length === 0) throw new Error("No files uploaded.");
         if (!userInfo._id) throw new Error("Invalid user.");
+
         const fileArray = Array.isArray(files) ? files : [files];
         const savedFileNames = [];
 
@@ -35,8 +46,6 @@ export const saveFile_func = async (files: any[], userInfo: IUser)=> {
 
             // Sanitize filename
             const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9_.-]/g, "_");
-
-            // Generate unique filename
             const timestamp = Date.now();
             const fileName = `${timestamp}_${sanitizedFileName}`;
             const buffer = Buffer.from(await file.arrayBuffer());
@@ -45,16 +54,14 @@ export const saveFile_func = async (files: any[], userInfo: IUser)=> {
             const mimeType = mime.lookup(file.name);
             if (!mimeType || !['image/jpeg', 'image/png', 'application/pdf'].includes(mimeType)) {
                 console.warn(`Unsupported file type skipped: ${mimeType}`);
-                continue; // Skip invalid files
+                continue;
             }
 
-            if (STORAGE_TYPE === "local") {
-                if (!existsSync(LOCAL_UPLOAD_PATH)) {
-                    await fsPromises.mkdir(LOCAL_UPLOAD_PATH, { recursive: true });
-                }
-                const filePath = path.join(LOCAL_UPLOAD_PATH, fileName);
-                await fsPromises.writeFile(filePath, buffer);
-            } else {
+            let fileUrl = "";
+            let cloudBucket = null;
+
+            if (STORAGE_TYPE === "s3") {
+                // AWS S3 Upload
                 const uploadParams = {
                     Bucket: BUCKET_NAME,
                     Key: fileName,
@@ -63,18 +70,43 @@ export const saveFile_func = async (files: any[], userInfo: IUser)=> {
                     ACL: 'public-read',
                 };
                 await s3.upload(uploadParams).promise();
+                fileUrl = `${process.env.S3_ENDPOINT}/${BUCKET_NAME}/${fileName}`;
+                cloudBucket = BUCKET_NAME;
+            } else if (STORAGE_TYPE === "cloudinary") {
+                // Cloudinary Upload
+                const cloudUpload = await new Promise((resolve, reject) => {
+                    const uploadStream = cloudinary.uploader.upload_stream(
+                        { resource_type: "auto", folder: "uploads" },
+                        (error, result) => {
+                            if (error) reject(error);
+                            else resolve(result);
+                        }
+                    );
+                    Readable.from(buffer).pipe(uploadStream);
+                });
+
+                fileUrl = (cloudUpload as any).secure_url;
+                cloudBucket = "cloudinary";
+            } else {
+                // Local Storage
+                if (!existsSync(LOCAL_UPLOAD_PATH)) {
+                    await fsPromises.mkdir(LOCAL_UPLOAD_PATH, { recursive: true });
+                }
+                const filePath = path.join(LOCAL_UPLOAD_PATH, fileName);
+                await fsPromises.writeFile(filePath, buffer);
+                fileUrl = BASE_URL + fileName;
             }
 
             // 🔹 Store file metadata in MongoDB
-            // await File.cate({ filename: fileName, userId, vendorId, role });
             const newFile = new File({
-                serverPath: STORAGE_TYPE === "local" ? BASE_URL + fileName :  process.env.S3_ENDPOINT,
+                serverPath: fileUrl,
                 filename: fileName,
-                bucket: STORAGE_TYPE === "local" ? null : BUCKET_NAME,
+                bucket: cloudBucket,
                 userId: userInfo._id,
                 vendorId: userInfo?.vendor,
                 role: userInfo.role
-            })
+            });
+
             const savedFile = await newFile.save();
             savedFileNames.push(savedFile);
         }

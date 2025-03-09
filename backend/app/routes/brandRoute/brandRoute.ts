@@ -6,7 +6,7 @@ import brandControllers from "../../controllers/brandControllers/brandController
 import { BrandPostSchema } from "../../models/Brand";
 //***** */ Replace check vendor to checkAdmin ******
 // Create brand
-app.openapi(Post({ path: "/brand/craete", tags: ["Brand"], middleware:[checkVendor], schema: BrandPostSchema, type: contentType.multipartFormData }), brandControllers().createBrand);
+app.openapi(Post({ path: "/brand/craete", tags: ["Brand"], middleware:[checkVendor], schema: BrandPostSchema }), brandControllers().createBrand);
 // Get brand
 app.openapi(Get({ path: "/brand/get", tags: ["Brand"] }), brandControllers().getAllBrands);
 // Edit brand

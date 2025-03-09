@@ -4,6 +4,7 @@ import { FieldTypes, type IFeature } from "./Features";
 export interface IProduct extends Document {
     name: string;
     description?: string;
+    featured?: boolean;
     brand?: mongoose.Types.ObjectId;
     price: number;
     stock: number;
@@ -34,6 +35,7 @@ const productSchema = new Schema(
     {
         name: { type: String, trim: true, required: true },
         description: { type: String, trim: true },
+        featured: { type: Boolean, default: false },
         brand: { type: mongoose.Types.ObjectId, ref: "Brand", required: false },
         price: { type: Number, required: true, min: 0 },
         stock: { type: Number, required: true, min: 0 },
@@ -109,6 +111,7 @@ export const Product = mongoose.model<IProduct>("Product", productSchema);
 export const ProductPostSchema = z.object({
     name: z.string().min(1, { message: "Product name is required" }),
     description: z.string().optional(),
+    featured: z.boolean().default(false).optional(),
     brand: z.string().min(1, { message: "Brand ID is required" }),
     price: z.number().min(0),
     stock: z.number().min(0),
