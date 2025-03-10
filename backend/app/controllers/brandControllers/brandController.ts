@@ -32,9 +32,9 @@ function brandControllers() {
             try {
                 const id = c.req.query("id") as string;
                 const userInfo = c.get("user");
-                const { logo, ...others } = await c.req.parseBody({ all: true });
-                const data: IBrand = parseToObject(others) as IBrand;
-                const result = await updateBrand_func(userInfo, id, data, logo);
+                const others = await c.req.json();
+                // const data: IBrand = parseToObject(others) as IBrand;
+                const result = await updateBrand_func(userInfo, id, others);
                 return c.json(result, result.success ? 200 : 400);
             } catch (err: any) {
                 return c.json({ success: false, message: err.message }, 500);
