@@ -16,7 +16,7 @@ const app = hono.basePath("/api/ecom");
 app.doc("/openapi-json", {
     openapi: "3.1.0",
     info: {
-        title: "E-com by AloIt",
+        title: "Cars By DevXedge",
         version: "v1",
     },
 });
