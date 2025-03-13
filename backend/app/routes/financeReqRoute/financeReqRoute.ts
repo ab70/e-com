@@ -8,7 +8,7 @@ import financeControllers from "../../controllers/financeControllers/financeCont
 import { FinancePostSchema } from "../../models/Finance";
 
 // Create finance request
-app.openapi(Post({ path: "/finance/craete", tags: ["Finance Request"], middleware: [checkVendor], schema: FinancePostSchema }), financeControllers().createFinance);
+app.openapi(Post({ path: "/finance/craete", tags: ["Finance Request"], schema: FinancePostSchema }), financeControllers().createFinance);
 // Get all finance requests
 app.openapi(Get({ path: "/finance/get", tags: ["Finance Request"], middleware: [checkVendor] }), financeControllers().getAllFinances);
 // Edit finance request
