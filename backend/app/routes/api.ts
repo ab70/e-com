@@ -1,5 +1,6 @@
 import("./authRoute/authRoute")
 import("./categoryRoute/categoryRoute")
+import("./featureRoute/featureRoute")
 import("./productRoute/productRoute")
 import("./orderRoute/orderRoute")
 import("./vendorRoute/vendorRoute")
