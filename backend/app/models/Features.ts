@@ -1,11 +1,22 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { z } from "@hono/zod-openapi";
-
+export interface ICustomField {
+    fieldName: string;
+    fieldLabel: string;
+    fieldType: FieldTypes;
+    options?: {
+        value: string;
+        label: string;
+    }[];
+    required?: boolean;
+    fieldValue?: string;
+    defaultValue?: string;
+}
 export interface IFeature extends Document {
     name: string;
     description?: string;
     category?: mongoose.Types.ObjectId;
-    customFields?: any[];
+    customFields?: ICustomField[];
 }
 
 export enum FieldTypes {

@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { z } from "@hono/zod-openapi";
-import { FieldTypes, type IFeature } from "./Features";
+import { FieldTypes, type ICustomField, type IFeature } from "./Features";
 export interface IProduct extends Document {
     name: string;
     description?: string;
@@ -26,7 +26,7 @@ export interface IProduct extends Document {
             images: string[];
         }[];
     };
-    features?: IFeature[];
+    features?: ICustomField[];
     createdBy: mongoose.Types.ObjectId;
     updatedBy: mongoose.Types.ObjectId;
 }
@@ -81,7 +81,6 @@ const productSchema = new Schema(
                         label: { type: String, trim: true },
                     },
                 ],
-                required: { type: Boolean, default: false },
                 fieldValue: { type: String, trim: true },
                 defaultValue: { type: String, trim: true },
             },
@@ -147,7 +146,6 @@ export const ProductPostSchema = z.object({
                     label: z.string().min(1, { message: "Option label is required" }),
                 })
             ).optional(),
-            required: z.boolean().optional(),
             fieldValue: z.string().optional(),
             defaultValue: z.string().optional(),
         })

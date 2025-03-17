@@ -21,6 +21,8 @@ export interface IVendor extends Document {
         postalCode?: string;
     }[];
     vendorType: VendorTypeEnum;
+    phoneNo: string[];
+    serviceEmail: string;
     createdBy: mongoose.Types.ObjectId;
     updatedBy: mongoose.Types.ObjectId;
 }
@@ -45,6 +47,8 @@ const vendorSchema = new Schema<IVendor>(
             default: VendorTypeEnum.Manufacturer,
             required: true,
         },
+        phoneNo: [{ type: String, trim: true, }],
+        serviceEmail: { type: String, trim: true },
         createdBy: { type: Schema.Types.ObjectId, ref: "User" },
         updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
     },
@@ -58,28 +62,17 @@ export const Vendor = mongoose.model<IVendor>("Vendor", vendorSchema);
 export const VendorPostSchema = z.object({
     vendorName: z.string().min(1, { message: "Vendor name is required" }),
     vendorDetails: z.string().optional(),
-    logo: z.any().openapi({ type: "string", format: "binary" }).optional(),
-    vendorAddress: z
-        .preprocess((value) => {
-            if (typeof value === "string") {
-                try {
-                    return JSON.parse(value);
-                } catch {
-                    throw new Error("Invalid JSON format for vendorAddress.");
-                }
-            }
-            return value;
-        },
-            z.array(
-                z.object({
-                    street: z.string().min(1, { message: "Street is required" }),
-                    city: z.string().min(1, { message: "City is required" }),
-                    state: z.string().optional(),
-                    country: z.string().min(1, { message: "Country is required" }),
-                    postalCode: z.string().optional(),
-                })
-            ).min(1, { message: "At least one address is required" })
-        ),
+    logo: z.string().optional(),
+    vendorAddress:
+        z.array(
+            z.object({
+                street: z.string().min(1, { message: "Street is required" }),
+                city: z.string().min(1, { message: "City is required" }),
+                state: z.string().optional(),
+                country: z.string().min(1, { message: "Country is required" }),
+                postalCode: z.string().optional(),
+            })
+        ).min(1, { message: "At least one address is required" }),
     vendorType: z.nativeEnum(VendorTypeEnum).optional(),
     // createdBy: z.string().min(1, { message: "CreatedBy (user ID) is required" }),
 });
