@@ -73,6 +73,8 @@ export const VendorPostSchema = z.object({
                 postalCode: z.string().optional(),
             })
         ).min(1, { message: "At least one address is required" }),
+    phoneNo: z.array(z.string().min(1, { message: "Phone number is required" })),
+    serviceEmail: z.string().min(1, { message: "Service email is required" }),
     vendorType: z.nativeEnum(VendorTypeEnum).optional(),
     // createdBy: z.string().min(1, { message: "CreatedBy (user ID) is required" }),
 });
