@@ -6,7 +6,7 @@ import { createSession } from "../../middlewares/sessionStore";
 import type { Context } from "hono";
 import { adminSignupUser_func } from "./functions/adminSignUp";
 import { vendorAdminSignup_func } from "./functions/vendorAdminSignUp";
-import { UserRole } from "../../models/User";
+import { User, UserRole } from "../../models/User";
 
 function authControllers() {
     return {
@@ -103,7 +103,8 @@ function authControllers() {
         // Get Current User Info
         async getCurrentUser(c: Context) {
             try {
-                const userInfo = c.get("user");
+                const u = c.get("user");
+                const userInfo = await User.findById(u._id).populate("vendor");
                 return c.json({ success: true, message: "User info found", data: userInfo });
             } catch (err: any) {
                 return c.json({ success: false, message: err.message }, 500);
