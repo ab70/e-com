@@ -6,11 +6,14 @@ import { Product } from "../../../models/Product";
 
 export async function createFinanceReq_func(userInfo: IUser, data: IFinance) {
     try {
-        const productId = new mongoose.Types.ObjectId(data.product.productId);
-        const productExists = await Product.findById(productId);
-        if (!productExists) {
-            return { success: false, message: "Product not found.", data: null };
-        }
+        // if(data.product.productId){
+
+        // }
+        // const productId = new mongoose.Types.ObjectId(data.product.productId);
+        // const productExists = await Product.findById(productId);
+        // if (!productExists) {
+        //     return { success: false, message: "Product not found.", data: null };
+        // }
         const financeEntry = new Finance(data);
         const savedFinance = await financeEntry.save();
 

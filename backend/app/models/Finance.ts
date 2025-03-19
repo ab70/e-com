@@ -79,8 +79,8 @@ const financeSchema: Schema<IFinance> = new Schema(
             }],
         },
         product: {
-            productId: { type: mongoose.Types.ObjectId, ref: "Product", required: true },
-            type: { type: String, required: true, trim: true },
+            productId: { type: mongoose.Types.ObjectId, ref: "Product" },
+            type: { type: String, trim: true },
             specificRequirements: { type: String, trim: true },
             tradeInVehicle: {
                 year: { type: Number },
@@ -132,15 +132,15 @@ export const FinancePostSchema = z.object({
         ).optional(),
     }),
     product: z.object({
-        productId: z.string().min(1, { message: "Product ID is required" }),
-        type: z.string().min(1, { message: "Vehicle type is required" }),
+        productId: z.string().optional(),
+        type: z.string().optional(),
         specificRequirements: z.string().optional(),
         tradeInVehicle: z.object({
-            year: z.number(),
-            make: z.string().min(1, { message: "Make is required" }),
-            model: z.string().min(1, { message: "Model is required" }),
-            trim: z.string().min(1, { message: "Trim is required" }),
-            amountOwed: z.number(),
+            year: z.number().optional(),
+            make: z.string().optional(),
+            model: z.string().optional(),
+            trim: z.string().optional(),
+            amountOwed: z.number().optional(),
         }).optional(),
-    }),
+    }).optional(),
 });
