@@ -6,8 +6,8 @@ export interface IProduct extends Document {
     description?: string;
     featured?: boolean;
     brand?: mongoose.Types.ObjectId;
-    price: number;
-    stock: number;
+    price?: number;
+    stock?: number;
     discount: {
         price: number;
         startAt: Date;
@@ -37,8 +37,8 @@ const productSchema = new Schema(
         description: { type: String, trim: true },
         featured: { type: Boolean, default: false },
         brand: { type: mongoose.Types.ObjectId, ref: "Brand", required: false },
-        price: { type: Number, required: true, min: 0 },
-        stock: { type: Number, required: true, min: 0 },
+        price: { type: Number, required: false },
+        stock: { type: Number, required: false, },
         discount: {
             price: { type: Number, default: 0 },
             startAt: { type: Date, default: null },

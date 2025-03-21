@@ -35,8 +35,7 @@ const featuresSchema: Schema<IFeature> = new Schema(
         category: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Category",
-            required: true,
-            default: null
+            required: true
         },
         customFields: [{
             fieldName: { type: String, trim: true },
@@ -62,7 +61,7 @@ const featuresSchema: Schema<IFeature> = new Schema(
 );
 
 
-
+featuresSchema.index({ category: 1, }, { unique: true });
 export const Feature = mongoose.model<IFeature>("Feature", featuresSchema);
 
 // Validation Schemas using zod

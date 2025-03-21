@@ -1,6 +1,12 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { z } from "@hono/zod-openapi";
 
+export enum FinanceStatus {
+    PENDING = "pending",
+    APPROVED = "approved",
+    REJECTED = "rejected",
+}
+
 export interface IFinance extends Document {
     firstName: string;
     lastName: string;
@@ -31,6 +37,7 @@ export interface IFinance extends Document {
             amount: number;
         }[];
     };
+    category?: mongoose.Types.ObjectId;
     product: {
         productId: mongoose.Types.ObjectId;
         type: string;
@@ -43,6 +50,7 @@ export interface IFinance extends Document {
             amountOwed: number;
         };
     };
+    status: FinanceStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -78,6 +86,7 @@ const financeSchema: Schema<IFinance> = new Schema(
                 amount: { type: Number, required: true }
             }],
         },
+        category: { type: mongoose.Schema.Types.ObjectId, ref: "Category" },
         product: {
             productId: { type: mongoose.Types.ObjectId, ref: "Product" },
             type: { type: String, trim: true },
@@ -90,6 +99,7 @@ const financeSchema: Schema<IFinance> = new Schema(
                 amountOwed: { type: Number },
             },
         },
+        status: { type: String, enum: Object.values(FinanceStatus), default: FinanceStatus.PENDING },
     },
     {
         timestamps: true,
@@ -131,6 +141,7 @@ export const FinancePostSchema = z.object({
             })
         ).optional(),
     }),
+    category: z.string().optional(),
     product: z.object({
         productId: z.string().optional(),
         type: z.string().optional(),
@@ -143,4 +154,5 @@ export const FinancePostSchema = z.object({
             amountOwed: z.number().optional(),
         }).optional(),
     }).optional(),
+    status: z.nativeEnum(FinanceStatus).optional(),
 });
