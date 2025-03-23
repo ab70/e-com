@@ -28,7 +28,7 @@ export const getAllFinanceReq_func = async (pagination: any) => {
         };
 
         // Fetch finance entries based on query and pagination
-        const finances = await Finance.find(queryObj).populate("product.productId").sort({ createdAt: -1 }).skip(options.skip).limit(options.limit);
+        const finances = await Finance.find(queryObj).populate("product.productId category").sort({ createdAt: -1 }).skip(options.skip).limit(options.limit);
         const totalFinances = await Finance.countDocuments(queryObj);
 
         return {
